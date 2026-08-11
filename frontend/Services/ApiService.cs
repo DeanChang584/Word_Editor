@@ -7,6 +7,7 @@ using WordFormatterUI.Models.Format;
 using WordFormatterUI.Models.History;
 using WordFormatterUI.Models.Preview;
 using WordFormatterUI.Models.Profile;
+using WordFormatterUI.Models.Settings;
 using WordFormatterUI.Models.Templates;
 
 namespace WordFormatterUI.Services;
@@ -307,6 +308,34 @@ public sealed class ApiService
     }
 
     // ═══════════════════════════════════════════════════════════
-    //  Settings — TODO: add when backend /api/settings is created
+    //  Settings
     // ═══════════════════════════════════════════════════════════
+
+    /// <summary>GET /api/settings — full settings, or null on failure.</summary>
+    public async Task<SettingsDto?> GetSettingsAsync()
+    {
+        try
+        {
+            var resp = await GetAsync<SettingsResponseDto>("/api/settings");
+            return resp?.Success == true ? resp.Data?.Settings : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>PUT /api/settings — persist theme, returns success.</summary>
+    public async Task<bool> UpdateSettingsAsync(string theme)
+    {
+        try
+        {
+            var resp = await PutAsync<object>("/api/settings", new { settings = new { theme } });
+            return resp?.Success == true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
