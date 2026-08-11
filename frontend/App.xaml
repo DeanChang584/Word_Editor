@@ -18,8 +18,8 @@
             <!-- AccentButtonStyle placed OUTSIDE ThemeDictionaries so
                  it resolves correctly regardless of theme lookup order -->
             <Style x:Key="AccentButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="#005FBA" />
-                <Setter Property="Foreground" Value="#FFFFFF" />
+                <Setter Property="Background" Value="{ThemeResource AccentButtonBackground}" />
+                <Setter Property="Foreground" Value="{ThemeResource AccentButtonForeground}" />
                 <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="CornerRadius" Value="4" />
@@ -36,18 +36,18 @@
                                         <VisualState x:Name="Normal" />
                                         <VisualState x:Name="PointerOver">
                                             <VisualState.Setters>
-                                                <Setter Target="BackgroundRect.Fill" Value="#146CBF" />
+                                                <Setter Target="BackgroundRect.Fill" Value="{ThemeResource AccentButtonPointerOverBackground}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Pressed">
                                             <VisualState.Setters>
-                                                <Setter Target="BackgroundRect.Fill" Value="#004A91" />
+                                                <Setter Target="BackgroundRect.Fill" Value="{ThemeResource AccentButtonPressedBackground}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                         <VisualState x:Name="Disabled">
                                             <VisualState.Setters>
-                                                <Setter Target="BackgroundRect.Fill" Value="#F3F3F3" />
-                                                <Setter Target="ContentPresenter.Foreground" Value="#A19F9D" />
+                                                <Setter Target="BackgroundRect.Fill" Value="{ThemeResource AccentButtonDisabledBackground}" />
+                                                <Setter Target="ContentPresenter.Foreground" Value="{ThemeResource AccentButtonDisabledForeground}" />
                                             </VisualState.Setters>
                                         </VisualState>
                                     </VisualStateGroup>

@@ -21,4 +21,23 @@
     <!-- ── File List Drop Area ──────────────────────────────── -->
     <SolidColorBrush x:Key="FileListBorderBrush" Color="#D1D1D1" />
 
+    <!-- ── Accent Button (App.xaml AccentButtonStyle) ───────── -->
+    <SolidColorBrush x:Key="AccentButtonBackground" Color="#005FBA" />
+    <SolidColorBrush x:Key="AccentButtonForeground" Color="#FFFFFF" />
+
+    <!-- ── Accent Button states (used by App.xaml AccentButtonStyle) ── -->
+    <SolidColorBrush x:Key="AccentButtonPointerOverBackground" Color="#146CBF" />
+    <SolidColorBrush x:Key="AccentButtonPressedBackground" Color="#004A91" />
+    <SolidColorBrush x:Key="AccentButtonDisabledBackground" Color="#F3F3F3" />
+    <SolidColorBrush x:Key="AccentButtonDisabledForeground" Color="#A19F9D" />
+
+    <!-- ── CheckBox checked states (accent blue family) ───────────── -->
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#005FBA" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#146CBF" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#004A91" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="#005FBA" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#146CBF" />
+    <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#004A91" />
+    <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
+
 </ResourceDictionary>

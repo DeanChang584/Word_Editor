@@ -120,10 +120,6 @@
                     <Button Content="保存配置" Style="{StaticResource AccentButtonStyle}"
                             Command="{x:Bind ViewModel.SaveProfileCommand}"
                             IsEnabled="{x:Bind ViewModel.CanSave, Mode=OneWay}">
-                        <Button.Resources>
-                            <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#D9D9D9" />
-                            <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#A19F9D" />
-                        </Button.Resources>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -198,15 +194,6 @@
                                                    Unchecked="FileCheckBox_CheckedChanged"
                                                    VerticalAlignment="Center"
                                                    HorizontalAlignment="Stretch">
-                                             <CheckBox.Resources>
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="#005FBA" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="#146CBF" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPressed" Color="#004A91" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="#005FBA" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPointerOver" Color="#146CBF" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeCheckedPressed" Color="#004A91" />
-                                                 <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#FFFFFF" />
-                                             </CheckBox.Resources>
                                              <CheckBox.Content>
                                                 <Grid Margin="0,2" ColumnSpacing="8">
                                                     <Grid.ColumnDefinitions>
@@ -231,18 +218,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Button Grid.Column="0" HorizontalAlignment="Stretch" x:Name="SelectAllBtn" Content="全选" Style="{StaticResource AccentButtonStyle}" IsEnabled="False" Click="SelectAll_Click">
-                                <Button.Resources>
-                                    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#D9D9D9" />
-                                    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#A19F9D" />
-                                </Button.Resources>
-                            </Button>
-                            <Button Grid.Column="1" HorizontalAlignment="Stretch" x:Name="InvertBtn" Content="反选" Style="{StaticResource AccentButtonStyle}" IsEnabled="False" Click="InvertSelection_Click">
-                                <Button.Resources>
-                                    <SolidColorBrush x:Key="AccentButtonBackgroundDisabled" Color="#D9D9D9" />
-                                    <SolidColorBrush x:Key="AccentButtonForegroundDisabled" Color="#A19F9D" />
-                                </Button.Resources>
-                            </Button>
+                            <Button Grid.Column="0" HorizontalAlignment="Stretch" x:Name="SelectAllBtn" Content="全选" Style="{StaticResource AccentButtonStyle}" IsEnabled="False" Click="SelectAll_Click" />
+                            <Button Grid.Column="1" HorizontalAlignment="Stretch" x:Name="InvertBtn" Content="反选" Style="{StaticResource AccentButtonStyle}" IsEnabled="False" Click="InvertSelection_Click" />
                         </Grid>
 
                         <!-- Remove / clear ops — left-aligned with "文件管理" title (no extra padding) -->
