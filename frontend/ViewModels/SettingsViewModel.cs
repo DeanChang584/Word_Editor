@@ -22,8 +22,13 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private string _theme = "light";
 
+    // Set once the user actively changes the theme — startup load must not
+    // overwrite a selection the user made while settings were still loading.
+    private bool _userChangedTheme;
+
     partial void OnThemeChanged(string value)
     {
+        _userChangedTheme = true;
         // Apply immediately; persist without blocking the UI thread.
         ThemeService.Apply(value);
         _ = PersistThemeAsync(value);
@@ -46,6 +51,9 @@ public partial class SettingsViewModel : ObservableObject
     {
         try
         {
+            // Respect a theme the user already picked while loading.
+            if (_userChangedTheme) return;
+
             var settings = await _api.GetSettingsAsync();
             if (settings is null) return;
             if (settings.Theme is "light" or "dark" or "system")
