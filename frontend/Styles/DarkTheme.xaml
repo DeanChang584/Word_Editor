@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ============================================================
+         Dark Theme — Office/WPS professional style
+         Accent: #6CB8F6 (lighter blue for dark backgrounds)
+         Background: #1F1F1F (WinUI dark layer)
+         Text: #F5F5F5 / #C8C8C8 / #9E9E9E
+         Border: #555555  |  Divider: #383838
+         ============================================================ -->
+
+    <!-- ── Navigation Bar ───────────────────────────────────── -->
+    <SolidColorBrush x:Key="NavBarBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="NavItemSelectedBackground" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="NavItemSelectedForeground" Color="#6CB8F6" />
+    <SolidColorBrush x:Key="NavItemHoverBackground" Color="#353535" />
+    <SolidColorBrush x:Key="NavItemDefaultIcon" Color="#9E9E9E" />
+    <SolidColorBrush x:Key="NavItemDefaultText" Color="#F5F5F5" />
+
+    <!-- ── File List Drop Area ──────────────────────────────── -->
+    <SolidColorBrush x:Key="FileListBorderBrush" Color="#555555" />
+
+</ResourceDictionary>

@@ -2,8 +2,7 @@
     x:Class="WordFormatterUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="using:WordFormatterUI.Converters"
-    RequestedTheme="Light">
+    xmlns:converters="using:WordFormatterUI.Converters">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -13,6 +12,7 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Default" Source="Styles/LightTheme.xaml" />
                 <ResourceDictionary x:Key="Light" Source="Styles/LightTheme.xaml" />
+                <ResourceDictionary x:Key="Dark" Source="Styles/DarkTheme.xaml" />
             </ResourceDictionary.ThemeDictionaries>
             <converters:InvertBoolToVisibilityConverter x:Key="InvertBoolToVisibilityConverter" />
             <!-- AccentButtonStyle placed OUTSIDE ThemeDictionaries so
