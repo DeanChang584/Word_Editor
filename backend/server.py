@@ -29,6 +29,7 @@ from backend.api import templates
 from backend.api import format as format_api
 from backend.api import history
 from backend.api import preview
+from backend.api import settings
 
 # ============================================================
 # Configuration
@@ -84,6 +85,7 @@ app.include_router(templates.router, prefix="/api", tags=["templates"])
 app.include_router(format_api.router, prefix="/api", tags=["format"])
 app.include_router(history.router, prefix="/api", tags=["history"])
 app.include_router(preview.router, prefix="/api", tags=["preview"])
+app.include_router(settings.router, prefix="/api", tags=["settings"])
 
 
 # ============================================================
