@@ -625,8 +625,6 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly ApiService _api;
 
-    public SettingsViewModel() : this(App.Api) { }
-
     public SettingsViewModel(ApiService api)
     {
         _api = api;
@@ -635,9 +633,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _language = "zh-CN";
     [ObservableProperty] private bool _autoCheckUpdate = true;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Theme))]
-    private string _theme = "light";
+    [ObservableProperty] private string _theme = "light";
 
     partial void OnThemeChanged(string value)
     {
