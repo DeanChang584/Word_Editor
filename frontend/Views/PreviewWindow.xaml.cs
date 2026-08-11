@@ -48,6 +48,9 @@ public sealed partial class PreviewWindow : Window
     /// <summary>Whether a PreviewWindow is currently open.</summary>
     public static bool IsOpen => _instance is not null;
 
+    /// <summary>Current PreviewWindow instance, or null if none is open (does not create).</summary>
+    public static PreviewWindow? Current => _instance;
+
     // ── State ──────────────────────────────────────────────────────────
 
     private CancellationTokenSource? _pollCts;
