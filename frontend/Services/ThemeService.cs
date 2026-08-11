@@ -15,6 +15,9 @@ public static class ThemeService
 {
     public static string CurrentMode { get; private set; } = "light";
 
+    /// <summary>Raised after the active theme mode changes (any Apply call).</summary>
+    public static event Action<string>? ThemeChanged;
+
     private static UISettings? _uiSettings;
 
     public static void Apply(string mode)
@@ -35,6 +38,8 @@ public static class ThemeService
 
         SyncApplicationTheme();
         EnsureSystemWatcher();
+
+        ThemeChanged?.Invoke(CurrentMode);
     }
 
     /// <summary>

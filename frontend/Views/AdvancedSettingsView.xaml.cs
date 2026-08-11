@@ -22,6 +22,13 @@ public sealed partial class AdvancedSettingsView : UserControl
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+        ThemeService.ThemeChanged += OnThemeChanged;
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -32,7 +39,23 @@ public sealed partial class AdvancedSettingsView : UserControl
         LanguageBox.SelectedIndex = 0;
 
         // Theme — select the item matching the current mode
-        var mode = ThemeService.CurrentMode;
+        SyncThemeSelection(ThemeService.CurrentMode);
+
+        _isLoading = false;
+    }
+
+    /// <summary>
+    /// Keep the dropdown in sync when the theme changes elsewhere
+    /// (e.g. the persisted theme loads after the view's Loaded event).
+    /// </summary>
+    private void OnThemeChanged(string mode)
+    {
+        SyncThemeSelection(mode);
+    }
+
+    private void SyncThemeSelection(string mode)
+    {
+        _isLoading = true;
         for (int i = 0; i < ThemeBox.Items.Count; i++)
         {
             if (ThemeBox.Items[i] is ComboBoxItem item && item.Tag?.ToString() == mode)
@@ -41,7 +64,6 @@ public sealed partial class AdvancedSettingsView : UserControl
                 break;
             }
         }
-
         _isLoading = false;
     }
 
