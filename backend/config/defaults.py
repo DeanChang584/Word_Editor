@@ -7,7 +7,7 @@ Import ``DEFAULT_SETTINGS`` to seed new configs or fill missing keys.
 
 # Default settings matching data model.md §11 (camelCase keys, same as JSON).
 DEFAULT_SETTINGS: dict = {
-    "theme": "system",           # system / light / dark
+    "theme": "light",            # system / light / dark
     "language": "zh-CN",         # 界面语言
     "defaultOutput": "sameFolder",  # sameFolder 或 自定义路径
     "defaultTemplate": "Default",   # 默认模板 ID 或名称

@@ -471,7 +471,7 @@ class HistoryRecord(_Base):
 class Settings(_Base):
     """Application-wide settings (independent of formatting profiles)."""
 
-    theme: str = "system"              # system / light / dark
+    theme: str = "light"             # system / light / dark
     language: str = "zh-CN"
     default_output: str = Field(default="sameFolder", alias="defaultOutput")
     default_template: str = Field(default="Default", alias="defaultTemplate")
