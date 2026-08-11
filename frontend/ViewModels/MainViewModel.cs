@@ -43,7 +43,7 @@ public partial class MainViewModel : ObservableObject
 
         // Utility VMs
         HistoryVm = new HistoryViewModel(api);
-        SettingsVm = new SettingsViewModel();
+        SettingsVm = new SettingsViewModel(api);
 
         // Wire section VMs to the shared DTO (initial load with values)
         LoadProfileToAllVms();
