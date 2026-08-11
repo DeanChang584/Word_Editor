@@ -44,8 +44,9 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
 
-        // Force Light theme on the root element immediately
-        ThemeService.Apply("light");
+        // Force Light theme on the root element immediately (App.MainWindow is not
+        // yet assigned during the constructor, so ThemeService.Apply cannot apply yet).
+        ((FrameworkElement)Content).RequestedTheme = ElementTheme.Light;
 
         // Create the main ViewModel and set as DataContext
         var api = App.Api ?? throw new InvalidOperationException("ApiService not initialized");
