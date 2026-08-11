@@ -36,6 +36,12 @@ public sealed partial class PreviewWindow : Window
             if (_instance is null)
             {
                 _instance = new PreviewWindow();
+
+                // Apply after assignment: inside the constructor _instance is
+                // still null (RHS runs first), so Current would be null there.
+                // Apply is idempotent; re-applying to the main window is harmless.
+                ThemeService.Apply(ThemeService.CurrentMode);
+
                 _instance.Closed += (_, _) =>
                 {
                     lock (_instanceLock) { _instance = null; }
@@ -94,9 +100,6 @@ public sealed partial class PreviewWindow : Window
     public PreviewWindow()
     {
         InitializeComponent();
-
-        // Inherit the currently selected theme (idempotent; also re-applies to main window, harmless).
-        ThemeService.Apply(ThemeService.CurrentMode);
 
         // Custom title bar
         ExtendsContentIntoTitleBar = true;
