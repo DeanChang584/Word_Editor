@@ -49,7 +49,7 @@ public sealed partial class PreviewWindow : Window
     public static bool IsOpen => _instance is not null;
 
     /// <summary>Current PreviewWindow instance, or null if none is open (does not create).</summary>
-    public static PreviewWindow? Current => _instance;
+    public static new PreviewWindow? Current => _instance;
 
     // ── State ──────────────────────────────────────────────────────────
 
