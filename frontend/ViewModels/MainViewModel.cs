@@ -322,6 +322,9 @@ public partial class MainViewModel : ObservableObject
         // Wait for backend health check to pass (up to 15s)
         await App.WaitForBackendAsync();
 
+        // Load persisted settings (theme) from backend and apply
+        await SettingsVm.InitializeAsync();
+
         // Use local defaults for the profile (more reliable than backend).
         // The profile is already set up in the constructor via LoadProfileToAllVms()
         // with a fresh ProfileConfigDto containing all proper defaults.

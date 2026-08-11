@@ -46,8 +46,10 @@
                     x:Name="ThemeBox"
                     Height="32"
                     HorizontalAlignment="Stretch"
-                    SelectedIndex="0">
+                    SelectionChanged="ThemeBox_SelectionChanged">
                     <ComboBoxItem Tag="light">浅色</ComboBoxItem>
+                    <ComboBoxItem Tag="dark">深色</ComboBoxItem>
+                    <ComboBoxItem Tag="system">跟随系统</ComboBoxItem>
                 </ComboBox>
             </Grid>
 

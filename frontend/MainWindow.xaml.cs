@@ -52,6 +52,9 @@ public sealed partial class MainWindow : Window
         ViewModel = new MainViewModel(api);
         ((FrameworkElement)Content).DataContext = ViewModel;
 
+        // Inject SettingsVm into the advanced settings view (theme persistence)
+        AdvancedSettingsView.SettingsVm = ViewModel.SettingsVm;
+
         // Map section panels in order matching nav items.
         // TableSettingsView is created dynamically after Loaded (fix XAML parsing race).
         _sectionPanels = new FrameworkElement[]
