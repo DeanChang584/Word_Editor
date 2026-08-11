@@ -95,6 +95,9 @@ public sealed partial class PreviewWindow : Window
     {
         InitializeComponent();
 
+        // Inherit the currently selected theme (idempotent; also re-applies to main window, harmless).
+        ThemeService.Apply(ThemeService.CurrentMode);
+
         // Custom title bar
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleBarGrid);
