@@ -126,10 +126,11 @@ public sealed partial class MainWindow : Window
             App.TrayIcon?.Dispose();
 
             // Notify backend to exit — capped wait so shutdown is never slow.
+            // 对于 localhost 请求 5-20ms 即可完成；上限 100ms 只是兜底超时。
             try
             {
                 var shutdown = App.Api.ShutdownBackendAsync();
-                shutdown.Wait(TimeSpan.FromMilliseconds(300));
+                shutdown.Wait(TimeSpan.FromMilliseconds(100));
             }
             catch { /* 后端已死/无响应 → 直接退出 */ }
 

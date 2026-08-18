@@ -152,6 +152,9 @@
   - 前端预校验文件/文件夹路径，不存在时立即提示具体名称。
 - [x] **关闭软件延迟**：`Closed` 处理器原为 `async void` 且 `await ShutdownBackendAsync()`（2s 超时），
   WinUI 3 窗口关闭后 await 续体可能被丢弃导致进程残留。改为同步：后端退出最多等 300ms、WPS COM 后台释放、立即 `Environment.Exit(0)`。
+  - **二次修复（关闭仍慢 ~326ms）**：定位为 sync-over-async 死锁——UI 线程 `.Wait()` 等 async 任务，
+    `await _http.PostAsync` 捕获 DispatcherQueue 上下文导致 continuation 排队到被阻塞的 UI 线程，死锁到超时。
+    给 `/api/shutdown` 调用加 `ConfigureAwait(false)` + 等待上限 300ms→100ms。实测窗口销毁 326ms → 22ms。
 - [x] **界面层次**：ConfigScroll 内边距 8/8、ConfigCard 左内边距 0→16（修复文字溢出白卡片）、
   窗口/卡片/导航配色对齐 v2.0.1 参考设计（窗口纯白、导航 #FAFAFA、选中 #E8F0FE、输入框边框加深 #8A8A8A）。
 

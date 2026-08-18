@@ -295,8 +295,12 @@ public sealed class ApiService
     {
         try
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
-            var resp = await _http.PostAsync("/api/shutdown", null, cts.Token);
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+            // ConfigureAwait(false)：此调用常从 UI 线程的 Window.Closed 处理器触发，
+            // 且调用方用 .Wait() 同步等待。若保守捕获 DispatcherQueue 上下文，continuation
+            // 会排队到被阻塞的 UI 线程 → 死锁直到超时 (sync-over-async)，窗口关闭被拖慢数百 ms。
+            // 指定 false 让续体在线程池运行，HTTP 完成后 Task 立即完成，Wait 快速返回。
+            var resp = await _http.PostAsync("/api/shutdown", null, cts.Token).ConfigureAwait(false);
             if (resp.IsSuccessStatusCode)
                 System.Diagnostics.Debug.WriteLine("Shutdown request sent to backend");
         }

@@ -11,7 +11,7 @@
   - 前端 ComboBox 下拉回填加重入锁，消除 SelectionChanged 内修改 Items 导致的 WinUI 崩溃。
   - 模板应用链路 (ApplySelectedTemplate / SwitchTemplateAsync) 加 try-catch，失败显示到状态栏而非退出进程。
 - **添加文档没反应**：`FilesViewModel.StatusMessage` 此前只赋值从不显示，任何失败都静默。现同步到状态栏，并增加前端路径预校验（文件/文件夹不存在时立即提示具体名称）。
-- **关闭软件延迟**：关闭时不再 `await` 网络请求后才退出；后端退出最多等 300ms，WPS COM 单例后台释放，点击关闭后立即退出。
+- **关闭软件延迟**：关闭时不再 `await` 网络请求后才退出；后端退出最多等 100ms，WPS COM 单例后台释放，点击关闭后立即退出。`/api/shutdown` 调用加 `ConfigureAwait(false)`，消除 UI 线程 sync-over-async 死锁（实测窗口销毁 326ms → 22ms）。
 - **界面层次**：内容区内边距对齐（左 8 / 右 8），ConfigCard 左内边距修复（文字不再溢出白色卡片），窗口/卡片/导航栏配色对齐 v2.0.1 参考设计，输入框边框加深保证框体清晰可辨。
 
 ### 优化
