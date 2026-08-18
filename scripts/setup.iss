@@ -3,7 +3,7 @@
 
 #define MyAppName "Word Formatter"
 #define MyAppShortName "WordFormatter"
-#define MyAppVersion "2.0.1"
+#define MyAppVersion "2.1"
 #define MyAppPublisher "Dean Chang (TechWordsInSight)"
 #define MyAppURL "https://github.com/DeanChang584/WordFormatter"
 #define MyAppExeName "WordFormatter.exe"

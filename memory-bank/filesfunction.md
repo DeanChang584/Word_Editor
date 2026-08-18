@@ -225,7 +225,7 @@
 |---|---|
 | `schemas.py` | 17 个 Pydantic DTO：FileItem/DocumentGridConfig/PageConfig/HeaderFooterConfig/BodyConfig/HeadingStyleConfig/PictureConfig/TableConfig/ProfileConfig/Template/Task/FileResult/TaskResult/PreviewResult/HistoryRecord/HistoryFileItem/Settings/LogEntry；_default_headings() 工厂函数（6 级独立实例）|
 | `constants.py` | 共享常量：FONT_SIZE_MAP/FONT_SIZE_NAMES/font_size_to_name/PAPER_SIZES；ErrorCode(0+1000-1010)；TaskState(7 状态)；FileProcessingStatus(4 状态) |
-| `version.py` | VERSION = "2.0" |
+| `version.py` | VERSION = "2.1" |
 | `__init__.py` | 包标识 |
 
 ---

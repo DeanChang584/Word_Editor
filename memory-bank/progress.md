@@ -134,3 +134,36 @@
 ---
 
 > 最后更新：2026-07-15
+
+---
+
+## 阶段 12：v2.1 稳定性与体验优化（2026-08-18）
+
+> 版本号 2.0 → 2.1。本轮修复三个线上问题 + 启动优化 + 界面层次对齐。
+
+### 修复
+
+- [x] **模板切换崩溃**：修复「调整字号 → 保存模板 → 选择刚保存的模板 → 软件退出」。
+  - 后端 `get_all_templates()` 补齐 profile 字段 → 前端 `ApplySelectedTemplate` 可真正应用模板。
+  - `FormatControlView.PopulateTemplateBox` 加重入锁 `_isPopulating`，消除 SelectionChanged 内改 Items 的 WinUI 崩溃。
+  - `ApplySelectedTemplate` / `SwitchTemplateAsync` 加 try-catch，异常显示到状态栏而非退出进程。
+- [x] **添加文档没反应（静默失败）**：`FilesViewModel.StatusMessage` 从未被 UI 显示。
+  - `MainViewModel.WireSubVmSync` 增加 `FilesVm.StatusMessage → StatusText` 转发。
+  - 前端预校验文件/文件夹路径，不存在时立即提示具体名称。
+- [x] **关闭软件延迟**：`Closed` 处理器原为 `async void` 且 `await ShutdownBackendAsync()`（2s 超时），
+  WinUI 3 窗口关闭后 await 续体可能被丢弃导致进程残留。改为同步：后端退出最多等 300ms、WPS COM 后台释放、立即 `Environment.Exit(0)`。
+- [x] **界面层次**：ConfigScroll 内边距 8/8、ConfigCard 左内边距 0→16（修复文字溢出白卡片）、
+  窗口/卡片/导航配色对齐 v2.0.1 参考设计（窗口纯白、导航 #FAFAFA、选中 #E8F0FE、输入框边框加深 #8A8A8A）。
+
+### 优化
+
+- [x] **启动速度**：Launcher 不再串行等待后端健康检查（最多 20s 白屏），改为并行启动前端 + 后台轮询；
+  MainWindow `Page_Loaded` 先渲染壳层、数据后台加载。
+
+### 待实现项（更新后）
+
+- [ ] 列间拖拽分隔条 GridSplitter（现为静态 1px 分隔线）
+- [ ] 自动更新机制
+- [ ] 多语言国际化
+- [ ] 打包发布（PyInstaller + dotnet publish + Inno Setup）— 已更新 setup.iss 版本号 2.1
+

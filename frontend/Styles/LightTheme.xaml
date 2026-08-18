@@ -10,15 +10,30 @@
          Border: #D1D1D1  |  Divider: #EDEBE9
          ============================================================ -->
 
-    <!-- ── Navigation Bar ───────────────────────────────────── -->
-    <SolidColorBrush x:Key="NavBarBackground" Color="Transparent" />
-    <SolidColorBrush x:Key="NavItemSelectedBackground" Color="#FAFAFA" />
+    <!-- ── Surfaces (参考 v2.0.1: 纯白窗口背景 vs 纯白卡片, 靠边框分层) ── -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="LayerFillColorDefaultBrush" Color="#F9F9F9" />
+
+    <!-- ── 输入框边框 (v2.0.1 #D5D5D5 之上加深, 保证框体明显可辨) ── -->
+    <SolidColorBrush x:Key="TextControlBorderBrush" Color="#8A8A8A" />
+    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#666666" />
+    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#005FBA" />
+    <SolidColorBrush x:Key="TextControlBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="#C8C8C8" />
+
+    <!-- ── Navigation Bar (v2.0.1: #FAFAFA 浅灰导航, 选中 #E8F0FE) ── -->
+    <SolidColorBrush x:Key="NavBarBackground" Color="#FAFAFA" />
+    <SolidColorBrush x:Key="NavItemSelectedBackground" Color="#E8F0FE" />
     <SolidColorBrush x:Key="NavItemSelectedForeground" Color="#005FBA" />
-    <SolidColorBrush x:Key="NavItemHoverBackground" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="NavItemHoverBackground" Color="#F0F0F0" />
     <SolidColorBrush x:Key="NavItemDefaultIcon" Color="#605E5C" />
     <SolidColorBrush x:Key="NavItemDefaultText" Color="#201F1E" />
 
-    <!-- ── File List Drop Area ──────────────────────────────── -->
+    <!-- ── File List Drop Area (v2.0.1: #D1D1D1) ─────────────── -->
     <SolidColorBrush x:Key="FileListBorderBrush" Color="#D1D1D1" />
 
     <!-- ── Accent Button (App.xaml AccentButtonStyle) ───────── -->

@@ -19,7 +19,7 @@
         <Border
             CornerRadius="8"
             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-            Padding="0,16,24,24">
+            Padding="16,16,16,24">
 
         <Grid RowSpacing="24">
             <Grid.RowDefinitions>

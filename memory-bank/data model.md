@@ -1,6 +1,6 @@
 # Word Formatter 数据模型文档（Data Model）
 
-> **Version**：2.0
+> **Version**：2.1
 > **Last Update**：2026-07-15
 > **Architecture**：WinUI 3 + Python Backend
 
@@ -405,7 +405,7 @@ Profile
 {
   "id": "tpl_001",
   "name": "默认模板",
-  "version": "2.0",
+  "version": "2.1",
   "author": "",
   "description": "",
   "createTime": "2026-07-01T08:00:00Z",
@@ -621,7 +621,7 @@ Level 2 预览通过 WPS/Word COM 将格式化后的 .docx 转为 PDF，再通�
 
 ## 16. 数据版本管理
 
-所有持久化数据包含 `version` 字段（当前 "2.0"）。
+所有持久化数据包含 `version` 字段（当前 "2.1"）。
 
 - 向前兼容：新版本软件必须能读取旧版本数据
 - 字段新增：为新字段提供默认值

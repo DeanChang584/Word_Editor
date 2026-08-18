@@ -111,13 +111,21 @@ namespace WordFormatterUI.ViewModels;
         _mainVm.FormatVm.SelectedTemplateName = template.Name;
         _mainVm.TemplateName = template.Name;
 
-        // Reload profile from the new template
-        await _mainVm.ProfileVm.LoadProfileCommand.ExecuteAsync(null);
-
-        if (_mainVm.ProfileVm.Profile is not null)
+        // Apply the template's own profile (included in the list since it now
+        // carries profile data). Fall back to loading the saved profile.
+        if (template.Profile is not null)
         {
-            _mainVm.SharedProfile = _mainVm.ProfileVm.Profile;
+            _mainVm.SharedProfile = template.Profile;
             _mainVm.SyncProfileToAllVms();
+        }
+        else
+        {
+            await _mainVm.ProfileVm.LoadProfileCommand.ExecuteAsync(null);
+            if (_mainVm.ProfileVm.Profile is not null)
+            {
+                _mainVm.SharedProfile = _mainVm.ProfileVm.Profile;
+                _mainVm.SyncProfileToAllVms();
+            }
         }
 
         _mainVm.IsDirty = false;

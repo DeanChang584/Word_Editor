@@ -239,8 +239,18 @@ public partial class MainViewModel : ObservableObject
         // --- FilesVm → MainViewModel ---
         FilesVm.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName == nameof(FilesVm.FileCount))
-                FileCountText = $"文档：{FilesVm.FileCount}";
+            switch (args.PropertyName)
+            {
+                case nameof(FilesVm.FileCount):
+                    FileCountText = $"文档：{FilesVm.FileCount}";
+                    break;
+                // 让「添加/移除/清空」的失败信息显示到状态栏，
+                // 避免任何文件操作静默无反馈。
+                case nameof(FilesVm.StatusMessage):
+                    if (!string.IsNullOrEmpty(FilesVm.StatusMessage))
+                        StatusText = FilesVm.StatusMessage;
+                    break;
+            }
         };
     }
 

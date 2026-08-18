@@ -111,14 +111,34 @@ public sealed partial class MainWindow : Window
         //  before this event handler was registered, so the event was missed.)
         ViewModel.RefreshAllViews();
 
-        // Register window close → clean shutdown of backend + tray icon
-        Closed += async (_, _) =>
+        // Register window close → clean shutdown of backend + tray icon.
+        // 注意：不能 await 网络调用 —— WinUI 3 在最后一个窗口关闭后会开始
+        // 拆卸 DispatcherQueue，async void 的 await 续体可能被延后/丢弃，
+        // 导致 Environment.Exit 迟迟不执行、进程残留。这里改为：
+        //   1. 同步释放托盘图标（纯 Win32，毫秒级）
+        //   2. 后端退出请求最多等 300ms（开发模式 run.bat 依赖它停后端；
+        //      生产模式 Launcher 本来就会在退出后 Kill backend.exe）
+        //   3. 释放预热的 WPS COM 单例（后台，不阻塞退出）
+        //   4. 立即 Environment.Exit(0)
+        Closed += (_, _) =>
         {
-            // Remove tray icon first
+            // Remove tray icon first (synchronous, fast)
             App.TrayIcon?.Dispose();
-            // Notify backend to exit
-            await App.Api.ShutdownBackendAsync();
-            // Fully exit the process
+
+            // Notify backend to exit — capped wait so shutdown is never slow.
+            try
+            {
+                var shutdown = App.Api.ShutdownBackendAsync();
+                shutdown.Wait(TimeSpan.FromMilliseconds(300));
+            }
+            catch { /* 后端已死/无响应 → 直接退出 */ }
+
+            // Release the pre-warmed WPS COM singleton (background, non-blocking).
+            // 不调用的话每次退出都会残留一个隐藏的 WPS 进程。
+            try { _ = System.Threading.Tasks.Task.Run(() => Services.DocumentPreviewService.Shutdown()); }
+            catch { }
+
+            // Fully exit the process immediately.
             Environment.Exit(0);
         };
 
@@ -304,11 +324,20 @@ public sealed partial class MainWindow : Window
 
     private async void Page_Loaded(object sender, RoutedEventArgs e)
     {
-        await ViewModel.InitializeAsync();
+        // 先完成不影响数据的壳层初始化，让窗口立即可用
         UpdateFileButtonStates();
-
-        // 初始布局完成后，根据内容宽度设置左栏 compact 状态
         UpdateCompactState(LayoutRoot.ActualWidth);
+
+        // 数据加载 (含后端健康等待) 放到后台，不阻塞首次布局
+        try
+        {
+            await ViewModel.InitializeAsync();
+            UpdateFileButtonStates();
+        }
+        catch (Exception ex)
+        {
+            ViewModel.StatusText = $"初始化失败: {ex.Message}";
+        }
     }
 
     // ── Profile refresh → refresh all section view UI controls ────────
@@ -542,27 +571,36 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        // Guard: if there are unsaved changes, ask user first
-        if (ViewModel.IsDirty)
+        try
         {
-            var choice = await ShowUnsavedDialogAsync("模板切换");
-            if (choice == "save")
-                await ViewModel.SaveProfileCommand.ExecuteAsync(null);
-            else if (choice == "cancel")
+            // Guard: if there are unsaved changes, ask user first
+            if (ViewModel.IsDirty)
             {
-                FormatVm.PendingTemplate = null;
-                return;
+                var choice = await ShowUnsavedDialogAsync("模板切换");
+                if (choice == "save")
+                    await ViewModel.SaveProfileCommand.ExecuteAsync(null);
+                else if (choice == "cancel")
+                {
+                    FormatVm.PendingTemplate = null;
+                    return;
+                }
+                // "discard": proceed without saving
             }
-            // "discard": proceed without saving
-        }
 
-        // Update shared DTO and push to all section VMs (Step 9.3)
-        ViewModel.SharedProfile = tmpl.Profile;
-        ViewModel.LoadProfileToAllVms();
-        ProfileVm.ApplyTemplateProfile(tmpl.Profile);
-        FormatVm.PendingTemplate = null;
-        ViewModel.IsDirty = false;
-        ViewModel.RefreshTemplateName();
+            // Update shared DTO and push to all section VMs (Step 9.3)
+            ViewModel.SharedProfile = tmpl.Profile;
+            ViewModel.LoadProfileToAllVms();
+            ProfileVm.ApplyTemplateProfile(tmpl.Profile);
+            FormatVm.PendingTemplate = null;
+            ViewModel.IsDirty = false;
+            ViewModel.RefreshTemplateName();
+        }
+        catch (Exception ex)
+        {
+            // 模板应用失败不应导致进程退出 — 记录并反馈到状态栏
+            ViewModel.StatusText = $"模板应用失败: {ex.Message}";
+            FormatVm.PendingTemplate = null;
+        }
     }
 
     // ── Right Column: Fixed Bottom Bar Format Operations ────────────

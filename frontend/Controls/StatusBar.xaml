@@ -75,7 +75,7 @@
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             <TextBlock
                 x:Name="VersionBlock"
-                Text="Word Formatter 2.0"
+                Text="Word Formatter 2.1"
                 FontSize="12"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource TextFillColorTertiaryBrush}" />

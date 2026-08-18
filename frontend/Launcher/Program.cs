@@ -17,7 +17,7 @@ void Log(string msg) {
     try { File.AppendAllText(logPath, line + "\n"); } catch { }
 }
 
-Log($"Starting Word Formatter v2.0.1 from {appDir}");
+Log($"Starting Word Formatter v2.1 from {appDir}");
 
 // 1. Kill any leftover backend
 foreach (var proc in Process.GetProcessesByName("backend"))
@@ -55,23 +55,25 @@ else
     Log($"Backend not found at {backendPath}");
 }
 
-// 3. Wait for health check
-var healthUrl = "http://127.0.0.1:8765/api/health";
-bool backendReady = false;
-using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
-
-for (int i = 0; i < 40; i++) // up to 20 seconds
+// 3. 不再串行等待后端健康检查 — 立即启动前端，让前端自身的
+//    健康轮询 (App.PollBackendHealthAsync) 在后台并行完成。
+//    这消除了启动时的最大阻塞 (最多 20s 的白屏等待)。
+_ = Task.Run(async () =>
 {
-    try
+    var healthUrl = "http://127.0.0.1:8765/api/health";
+    using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+    for (int i = 0; i < 40; i++) // 后台并行轮询, 最多 20s
     {
-        var resp = await http.GetAsync(healthUrl);
-        if (resp.IsSuccessStatusCode) { backendReady = true; Log("Backend ready"); break; }
+        try
+        {
+            var resp = await http.GetAsync(healthUrl);
+            if (resp.IsSuccessStatusCode) { Log("Backend ready"); return; }
+        }
+        catch { }
+        await Task.Delay(500);
     }
-    catch { }
-    await Task.Delay(500);
-}
-
-if (!backendReady) Log("Warning: Backend not ready after timeout, launching UI anyway");
+    Log("Warning: Backend not ready after timeout");
+});
 
 // 4. Start frontend
 if (File.Exists(frontendPath))

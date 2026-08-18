@@ -1,6 +1,6 @@
 # Word Formatter 软件架构文档
 
-> **Version**：2.0
+> **Version**：2.1
 > **Last Update**：2026-07-12
 > **适用于**：WinUI 3 + Python Backend
 

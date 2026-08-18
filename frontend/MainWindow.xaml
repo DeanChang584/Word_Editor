@@ -12,7 +12,7 @@
     mc:Ignorable="d">
 
     <Grid x:Name="LayoutRoot" Loaded="Page_Loaded" SizeChanged="LayoutRoot_SizeChanged" PointerPressed="LayoutRoot_PointerPressed" Padding="0,0,0,0"
-          Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+          Background="{ThemeResource WindowBackgroundBrush}">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="32" />
@@ -58,7 +58,7 @@
                 x:Name="ConfigScroll"
                 Grid.Row="0"
                 VerticalScrollBarVisibility="Auto"
-                Padding="16,0,8,0">
+                Padding="8,0,8,0">
             <StackPanel Spacing="24" Margin="0,0,0,0">
 
                 <!-- Page Settings Section (extracted to PageSettingsView) -->
@@ -107,7 +107,7 @@
             </ScrollViewer>
 
             <!-- Save Bar — fixed at bottom of config column, does not scroll -->
-            <Grid x:Name="SaveBar" Grid.Row="1" Padding="16,8,16,8">
+            <Grid x:Name="SaveBar" Grid.Row="1" Padding="8,8,8,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />

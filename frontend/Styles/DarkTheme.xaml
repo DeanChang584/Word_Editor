@@ -11,9 +11,24 @@
          Border: #555555  |  Divider: #383838
          ============================================================ -->
 
-    <!-- ── Navigation Bar ───────────────────────────────────── -->
-    <SolidColorBrush x:Key="NavBarBackground" Color="Transparent" />
-    <SolidColorBrush x:Key="NavItemSelectedBackground" Color="#2D2D2D" />
+    <!-- ── Surfaces (深色窗口 vs 稍亮卡片，形成层次) ─────────── -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="CardBackgroundFillColorDefaultBrush" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="CardStrokeColorDefaultBrush" Color="#444444" />
+    <SolidColorBrush x:Key="LayerFillColorDefaultBrush" Color="#272727" />
+
+    <!-- ── 输入框边框 (深色背景上清晰可辨) ───────────────────── -->
+    <SolidColorBrush x:Key="TextControlBorderBrush" Color="#6E6E6E" />
+    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="#8A8A8A" />
+    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="#4CC2FF" />
+    <SolidColorBrush x:Key="TextControlBackground" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#242424" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="#2B2B2B" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush" Color="#555555" />
+
+    <!-- ── Navigation Bar (与窗口一致，突出内容区层次) ───────── -->
+    <SolidColorBrush x:Key="NavBarBackground" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="NavItemSelectedBackground" Color="#2D3B4A" />
     <SolidColorBrush x:Key="NavItemSelectedForeground" Color="#6CB8F6" />
     <SolidColorBrush x:Key="NavItemHoverBackground" Color="#353535" />
     <SolidColorBrush x:Key="NavItemDefaultIcon" Color="#9E9E9E" />

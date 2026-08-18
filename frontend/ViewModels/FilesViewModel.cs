@@ -73,10 +73,31 @@ public partial class FilesViewModel : ObservableObject
     [RelayCommand]
     public async Task AddFilesAsync(IEnumerable<string> paths)
     {
+        var list = (paths ?? Enumerable.Empty<string>()).ToList();
+        if (list.Count == 0)
+        {
+            StatusMessage = "未选择文件";
+            return;
+        }
+
+        // 前端预校验：立即提示不存在的路径，而不是等后端整批拒绝。
+        // 这解决了「添加文档后没反应」——失败信息现在会显示在状态栏。
+        var missing = list.Where(p => !System.IO.File.Exists(p)).ToList();
+        if (missing.Count > 0)
+        {
+            var sample = System.IO.Path.GetFileName(missing[0]);
+            StatusMessage = missing.Count == 1
+                ? $"文件不存在或无法访问：{sample}"
+                : $"有 {missing.Count} 个文件不存在或无法访问（如：{sample}）";
+            // 仍把有效文件发给后端，避免全部丢失
+            list = list.Where(p => System.IO.File.Exists(p)).ToList();
+            if (list.Count == 0) return;
+        }
+
         IsLoading = true;
         try
         {
-            var resp = await _api.AddFilesAsync(paths);
+            var resp = await _api.AddFilesAsync(list);
             if (resp?.Success == true)
             {
                 await ReloadAsync();
@@ -105,6 +126,12 @@ public partial class FilesViewModel : ObservableObject
     [RelayCommand]
     public async Task AddFolderAsync(string folder)
     {
+        if (string.IsNullOrWhiteSpace(folder) || !System.IO.Directory.Exists(folder))
+        {
+            StatusMessage = "文件夹不存在或无法访问";
+            return;
+        }
+
         IsLoading = true;
         try
         {

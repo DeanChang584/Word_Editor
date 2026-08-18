@@ -65,7 +65,7 @@ public sealed partial class StatusBar : UserControl
     public static readonly DependencyProperty VersionProperty =
         DependencyProperty.Register(
             nameof(Version), typeof(string), typeof(StatusBar),
-            new PropertyMetadata("Word Formatter 2.0", OnVersionChanged));
+            new PropertyMetadata("Word Formatter 2.1", OnVersionChanged));
 
     /// <summary>Current file being processed (right side), e.g. "当前：5/10".</summary>
     public static readonly DependencyProperty CurrentFileProperty =

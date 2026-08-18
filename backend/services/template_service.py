@@ -45,13 +45,20 @@ class TemplateService:
     # ------------------------------------------------------------------
 
     def get_all_templates(self) -> list[dict[str, Any]]:
-        """Return summary list of all templates (id, name, isDefault)."""
+        """Return list of all templates, each including its full profile.
+
+        The profile is required by the frontend to apply a template when the
+        user selects it (ApplySelectedTemplate reads ``TemplateDto.Profile``).
+        Omitting it made template selection a silent no-op and left the apply
+        path with a null profile.
+        """
         self._load_from_disk()
         return [
             {
                 "id": tmpl.id,
                 "name": tmpl.name,
                 "isDefault": tmpl.id == self._default_id,
+                "profile": tmpl.profile.to_dict(),
             }
             for tmpl in self._templates.values()
         ]

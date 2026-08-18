@@ -75,7 +75,7 @@
                     <TextBlock Text="Word Formatter" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock
                         x:Name="VersionText"
-                        Text="版本 v2.0"
+                        Text="版本 v2.1"
                         FontSize="14"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                 </StackPanel>

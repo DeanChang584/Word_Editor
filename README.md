@@ -2,7 +2,7 @@
 
 WinUI 3 + FastAPI 架构的 Word 文档批量排版工具。支持 `.doc` / `.docx` 双格式，兼容 Microsoft Office 和 WPS，适合批量文档格式规范化需求。
 
-> 最后更新：2026-07-16 | 版本：v2.0 | 平台：Windows 10/11
+> 最后更新：2026-08-18 | 版本：v2.1 | 平台：Windows 10/11
 
 ---
 
@@ -54,7 +54,7 @@ WinUI 3 + FastAPI 架构的 Word 文档批量排版工具。支持 `.doc` / `.do
 
 ### 方式一：安装包（推荐）
 
-从 [Releases](https://github.com/DeanChang584/WordFormatter/releases) 下载最新 `Word Formatter v2.0.exe`，双击安装即可。安装后双击桌面快捷方式启动。
+从 [Releases](https://github.com/DeanChang584/WordFormatter/releases) 下载最新 `Word Formatter v2.1.exe`，双击安装即可。安装后双击桌面快捷方式启动。
 
 **系统要求**：
 - Windows 10/11（x64）
@@ -150,7 +150,7 @@ WordFormatter/
 ├── shared/                       # 前后端共享契约
 │   ├── schemas.py                # 17 个 Pydantic DTO
 │   ├── constants.py              # 常量（字号/纸张/错误码）
-│   └── version.py                # VERSION = "2.0"
+│   └── version.py                # VERSION = "2.1"
 │
 ├── memory-bank/                  # 项目设计文档（8 个文件）
 ├── screenshots/                  # 界面截图

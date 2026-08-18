@@ -86,31 +86,42 @@ namespace WordFormatterUI.Views
 
         // ── Template selection ───────────────────────────────────────────
 
+        private bool _isPopulating; // guards against mutating Items inside SelectionChanged
+
         private void PopulateTemplateBox(FormatViewModel vm)
         {
-            TemplateBox.Items.Clear();
-            foreach (var t in vm.Templates)
+            if (_isPopulating) return;
+            _isPopulating = true;
+            try
             {
-                TemplateBox.Items.Add(new ComboBoxItem
+                TemplateBox.Items.Clear();
+                foreach (var t in vm.Templates)
                 {
-                    Content = t.Name,
-                    Tag = t.Id,
-                });
-            }
-
-            // Select current template
-            if (!string.IsNullOrEmpty(vm.SelectedTemplateId))
-            {
-                for (int i = 0; i < TemplateBox.Items.Count; i++)
-                {
-                    if (TemplateBox.Items[i] is ComboBoxItem item
-                        && item.Tag is string id
-                        && id == vm.SelectedTemplateId)
+                    TemplateBox.Items.Add(new ComboBoxItem
                     {
-                        TemplateBox.SelectedIndex = i;
-                        break;
+                        Content = t.Name,
+                        Tag = t.Id,
+                    });
+                }
+
+                // Select current template
+                if (!string.IsNullOrEmpty(vm.SelectedTemplateId))
+                {
+                    for (int i = 0; i < TemplateBox.Items.Count; i++)
+                    {
+                        if (TemplateBox.Items[i] is ComboBoxItem item
+                            && item.Tag is string id
+                            && id == vm.SelectedTemplateId)
+                        {
+                            TemplateBox.SelectedIndex = i;
+                            break;
+                        }
                     }
                 }
+            }
+            finally
+            {
+                _isPopulating = false;
             }
         }
 
@@ -124,6 +135,10 @@ namespace WordFormatterUI.Views
 
         private void TemplateBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // Programmatic population (PopulateTemplateBox) re-selects the current
+            // template — treat that as a UI sync, not a user action.
+            if (_isPopulating) return;
+
             var vm = GetVm();
             if (vm == null || TemplateBox.SelectedItem is not ComboBoxItem item || item.Tag is not string id)
                 return;

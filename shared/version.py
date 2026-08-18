@@ -1,3 +1,3 @@
 """Shared version constant for Word Formatter."""
 
-VERSION = "2.0.1"
+VERSION = "2.1"

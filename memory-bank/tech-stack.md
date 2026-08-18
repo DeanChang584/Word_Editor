@@ -1,6 +1,6 @@
 # Word Formatter — 技术栈与架构文档
 
-> Version: 2.0 | Platform: Windows 11 | Architecture: WinUI 3 + FastAPI + Python Engine | Updated: 2026-07
+> Version: 2.1 | Platform: Windows 11 | Architecture: WinUI 3 + FastAPI + Python Engine | Updated: 2026-07
 
 ---
 
@@ -129,7 +129,7 @@ WordFormatter/
 ├── shared/                       # 前后端共享契约
 │   ├── schemas.py                # 17 个 Pydantic DTO
 │   ├── constants.py              # 常量（字号/纸张/错误码/任务状态）
-│   └── version.py                # VERSION = "2.0"
+│   └── version.py                # VERSION = "2.1"
 │
 ├── memory-bank/                  # 设计文档（8 个文件）
 ├── logs/                         # 日志（滚动保存，30+90 天保留）

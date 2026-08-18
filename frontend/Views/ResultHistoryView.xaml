@@ -59,7 +59,7 @@
         </StackPanel>
 
         <!-- ── History section (collapsible) ────────────────────── -->
-       
+
         <Button
             x:Name="ToggleHistoryBtn"
             HorizontalAlignment="Stretch"

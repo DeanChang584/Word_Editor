@@ -49,3 +49,7 @@ scripts/*.iss
 .pytest_cache/
 .coverage
 *.zip
+
+
+# 测试生成的临时 docx 产物
+tests/_test_body_indent_*.docx
