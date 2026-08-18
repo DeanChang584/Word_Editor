@@ -134,9 +134,18 @@ public sealed partial class MainWindow : Window
             }
             catch { /* 后端已死/无响应 → 直接退出 */ }
 
-            // Release the pre-warmed WPS COM singleton (background, non-blocking).
-            // 不调用的话每次退出都会残留一个隐藏的 WPS 进程。
-            try { _ = System.Threading.Tasks.Task.Run(() => Services.DocumentPreviewService.Shutdown()); }
+            // Release the pre-warmed WPS COM singleton. 必须同步等待其完成：
+            // 1) 若 fire-and-forget，Environment.Exit 会抢先杀死进程，WPS 从不 Quit，
+            //    每个会话残留一个隐藏 wps.exe（实测累积 27 个）。
+            // 2) 未释放的 RCW 会让 CLR 退出时尝试 COM 清理，Environment.Exit 阻塞
+            //    数秒（实测 caption 关闭路径进程 12s 不退出）。
+            // WPS Quit 对隐藏空实例通常 <50ms；300ms 是兜底上限。
+            try
+            {
+                System.Threading.Tasks.Task.Run(
+                    () => Services.DocumentPreviewService.Shutdown())
+                    .Wait(TimeSpan.FromMilliseconds(300));
+            }
             catch { }
 
             // Fully exit the process immediately.

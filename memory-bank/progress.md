@@ -155,6 +155,10 @@
   - **二次修复（关闭仍慢 ~326ms）**：定位为 sync-over-async 死锁——UI 线程 `.Wait()` 等 async 任务，
     `await _http.PostAsync` 捕获 DispatcherQueue 上下文导致 continuation 排队到被阻塞的 UI 线程，死锁到超时。
     给 `/api/shutdown` 调用加 `ConfigureAwait(false)` + 等待上限 300ms→100ms。实测窗口销毁 326ms → 22ms。
+  - **三次修复（真实点击仍慢 2-3s）**：根因是 WPS COM 预热实例（隐藏 wps.exe）的 fire-and-forget 释放
+    被 `Environment.Exit(0)` 抢先杀死——RCW 未释放 → CLR 退出时等待 COM 清理数秒，且每会话泄漏一个隐藏
+    WPS 进程（实测累积 27+）。改为同步等待 `DocumentPreviewService.Shutdown()` ≤300ms 再退出。
+    实测真实鼠标点击 X：窗口销毁 389ms，wps.exe 不再累积（45→45）。
 - [x] **界面层次**：ConfigScroll 内边距 8/8、ConfigCard 左内边距 0→16（修复文字溢出白卡片）、
   窗口/卡片/导航配色对齐 v2.0.1 参考设计（窗口纯白、导航 #FAFAFA、选中 #E8F0FE、输入框边框加深 #8A8A8A）。
 
