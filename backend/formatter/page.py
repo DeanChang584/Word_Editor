@@ -12,7 +12,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import parse_xml, OxmlElement
 from lxml import etree
-from .data_model import DocumentGridConfig, HeaderFooterConfig, PageConfig, PAPER_SIZES
+from shared.constants import PAPER_SIZES
+from .data_model import DocumentGridConfig, HeaderFooterConfig, PageConfig
 
 # 最小合法边距（mm），防止 0/negative 导致 Word 报错
 _MIN_MARGIN_MM = 0.1

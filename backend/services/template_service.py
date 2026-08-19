@@ -30,9 +30,9 @@ _INDEX_FILE = _TEMPLATES_DIR / "index.json"
 class TemplateService:
     """Template management service with disk-backed persistence.
 
-    Templates are stored as individual JSON files in ``config/templates/``.
+    Templates are stored as individual JSON files in ``%LOCALAPPDATA%``.
     An ``index.json`` tracks ordering and the current default template ID.
-    On first access, two Q5 preset templates are seeded automatically.
+    On first access, a single default template is seeded automatically.
     """
 
     def __init__(self) -> None:
@@ -349,7 +349,7 @@ class TemplateService:
                 tmpl = Template.from_dict(data)
                 self._templates[tmpl.id] = tmpl
                 loaded += 1
-            except (json.JSONDecodeError, OSError, Exception) as exc:
+            except Exception as exc:
                 logger.warning("Failed to load template %s: %s", json_file.name, exc)
 
         # Seed presets if nothing was loaded

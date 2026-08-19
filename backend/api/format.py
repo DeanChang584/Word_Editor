@@ -94,8 +94,6 @@ async def cancel_task(req: CancelRequest):
         format_service.cancel_task(req.task_id)
     except KeyError:
         return _error(ErrorCode.TASK_NOT_FOUND)
-    except RuntimeError as exc:
-        return _error(ErrorCode.TASK_CANCELLED, str(exc))
 
     return success_response(message="Task cancelled")
 

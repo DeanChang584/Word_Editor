@@ -3,7 +3,7 @@ Word Formatter — Settings manager (Step 1.3)
 
 Loads, caches, and persists software-wide settings (data model.md §11).
 
-Storage path: ``config/settings.json`` (relative to project root).
+Storage path: ``%LOCALAPPDATA%\\WordFormatter\\settings.json``.
 
 Thread-safe: a threading.Lock serialises reads/writes so concurrent API
 requests never corrupt the JSON file.

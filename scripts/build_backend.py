@@ -13,7 +13,6 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DIST_DIR = PROJECT_ROOT / "dist"
 BUILD_DIR = PROJECT_ROOT / "build"
-SPEC_PATH = PROJECT_ROOT / "scripts" / "backend.spec"
 
 # ── Clean previous build ──────────────────────────────────────────────
 for d in [DIST_DIR / "WordFormatterBackend", BUILD_DIR]:
@@ -88,10 +87,10 @@ PyInstaller.__main__.run([
     "--hidden-import=win32com",
     "--hidden-import=win32com.client",
     "--hidden-import=win32api",
-    # Add data paths
+    # Add data paths (runtime data 已迁移到 %LOCALAPPDATA%\WordFormatter，
+    # 不再需要打包项目根的 config/)
     f"--add-data={PROJECT_ROOT / 'backend'}{os.pathsep}backend",
     f"--add-data={PROJECT_ROOT / 'shared'}{os.pathsep}shared",
-    f"--add-data={PROJECT_ROOT / 'config'}{os.pathsep}config",
     f"--add-data={PROJECT_ROOT / 'logs'}{os.pathsep}logs",
     # Entry point
     str(ENTRY_POINT),

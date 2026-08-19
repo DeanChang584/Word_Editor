@@ -68,6 +68,11 @@ class FormatService:
         Returns ``None`` if the task does not exist.
         Returns a special sentinel ``{"_not_finished": True}`` if the task
         exists but has not finished yet (API layer should distinguish).
+
+        Terminal tasks are pruned from the registry once their result is
+        served, so ``_tasks`` does not grow without bound over the lifetime
+        of the backend process. The frontend fetches the result exactly once
+        after the task reaches a terminal state, so pruning here is safe.
         """
         with self._task_lock:
             task = self._tasks.get(task_id)
@@ -75,7 +80,10 @@ class FormatService:
                 return None
             if task["result"] is None:
                 return {"_not_finished": True}
-            return task["result"]
+            result = task["result"]
+            if task["status"] in (TaskState.COMPLETED, TaskState.FAILED, TaskState.CANCELLED):
+                del self._tasks[task_id]
+            return result
 
     def task_exists(self, task_id: str) -> bool:
         """Check if a task ID exists."""
@@ -129,10 +137,14 @@ class FormatService:
         task_id = "task_" + uuid.uuid4().hex[:10]
         cancel_event = threading.Event()
 
+        # Resolve profile BEFORE registering the task. A malformed profile
+        # dict raises here (Propagates as ValueError → HTTP 400), and the
+        # task never enters the registry — otherwise a zombie entry with no
+        # worker thread would sit at "preparing" forever.
+        profile, template_name = self._resolve_profile(profile_spec)
+
         task: dict[str, Any] = {
-            "taskId": task_id,
             "status": TaskState.PREPARING,
-            "createTime": self._now_iso(),
             "startTime": None,
             "finishTime": None,
             "progress": 0,
@@ -141,16 +153,11 @@ class FormatService:
             "currentFile": "",
             "result": None,
             "_cancel_event": cancel_event,
-            "_template_name": "",
+            "_template_name": template_name,
         }
 
         with self._task_lock:
             self._tasks[task_id] = task
-
-        # Resolve profile
-        profile, template_name = self._resolve_profile(profile_spec)
-        with self._task_lock:
-            self._tasks[task_id]["_template_name"] = template_name
 
         # Start background thread
         thread = threading.Thread(
@@ -182,7 +189,10 @@ class FormatService:
             raise KeyError(f"Task not found: {task_id}")
 
         if task["status"] not in (TaskState.PREPARING, TaskState.RUNNING):
-            raise RuntimeError(f"Task is already {task['status']}")
+            # 任务已结束 → 取消是无意义的 no-op，返回成功而非报错，
+            # 避免前端对"已完成"任务误报"取消请求发送失败"。
+            logger.info("Cancel ignored: task %s already %s", task_id, task["status"])
+            return {"success": True, "reason": f"Task already {task['status']}"}
 
         cancel_event: threading.Event = task["_cancel_event"]
         cancel_event.set()
@@ -252,6 +262,7 @@ class FormatService:
             Path(output_dir).mkdir(parents=True, exist_ok=True)
 
         results: list[dict[str, Any]] = []
+        failed_files: list[dict[str, Any]] = []
         ok_count = 0
         fail_count = 0
         skipped_count = 0
@@ -262,7 +273,7 @@ class FormatService:
 
         for idx, fpath in enumerate(file_paths):
             # Check cancellation
-            if task.get("_cancel_event", threading.Event()).is_set():
+            if task["_cancel_event"].is_set():
                 # Mark remaining files as skipped
                 skipped_count += total - idx
                 for remaining in file_paths[idx:]:
@@ -308,6 +319,12 @@ class FormatService:
                     "output": "",
                     "message": msg,
                 })
+                # 记录完整路径 —— 前端重试失败文件需要全路径而非仅文件名
+                failed_files.append({
+                    "file": fname,
+                    "path": fpath,
+                    "status": "error",
+                })
 
             # Update progress (0-100)
             with self._task_lock:
@@ -324,10 +341,16 @@ class FormatService:
             "elapsed": elapsed,
             "outputDirectory": output_dir,
             "results": [r.to_dict() for r in file_results],
+            "failed_files": failed_files,
         })
         with self._task_lock:
             if task["status"] not in (TaskState.CANCELLED,):
-                task["status"] = TaskState.COMPLETED
+                # 全部文件都失败 → FAILED 终态（前端轮询依赖该状态触发结果加载）
+                task["status"] = (
+                    TaskState.FAILED
+                    if ok_count == 0 and fail_count > 0
+                    else TaskState.COMPLETED
+                )
             task["finishTime"] = self._now_iso()
             task["result"] = result_obj.to_dict()
             task["currentFile"] = ""

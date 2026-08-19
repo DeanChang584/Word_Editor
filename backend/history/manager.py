@@ -1,13 +1,13 @@
 """History record manager (Step 4.1).
 
 Persists completed formatting-task records as individual JSON files under
-``config/history/``.  Each record is a ``HistoryRecord`` (see
-``shared.schemas``).  The manager provides CRUD operations and a hook for
-``FormatService`` to call after a task finishes.
+``%LOCALAPPDATA%\\WordFormatter\\history``.  Each record is a
+``HistoryRecord`` (see ``shared.schemas``).  The manager provides CRUD
+operations and a hook for ``FormatService`` to call after a task finishes.
 
 Storage layout::
 
-    config/history/
+    %LOCALAPPDATA%/WordFormatter/history/
     ├── h_abc123.json
     ├── h_def456.json
     └── ...
@@ -35,7 +35,7 @@ _MAX_RECORDS = 50
 class HistoryManager:
     """Thread-safe history record manager with JSON-file persistence.
 
-    Each record is stored as ``{id}.json`` in ``config/history/``.  Records
+    Each record is stored as ``{id}.json`` in ``%LOCALAPPDATA%``.  Records
     are loaded lazily on first access and cached in memory.
     """
 

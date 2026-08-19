@@ -6,6 +6,7 @@ Phase 2 重构：直接接受 shared.schemas.ProfileConfig，引擎内部转换�
 """
 
 import os
+import threading
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -219,9 +220,24 @@ def _to_format_profile(profile: ProfileConfig,
 # 核心排版函数
 # ============================================================
 
+# 全局重入锁：串行化 COM 调用与输出文件命名。
+#  - 多个线程同时驱动同一个 WPS/Word COM 实例会引发 RPC 失败；
+#  - _resolve_output_path 的 check-then-write 存在竞态，两个并发任务处理
+#    同一输入会选中同一个 "-R.docx" 输出名，后写者静默覆盖前者结果。
+_ENGINE_LOCK = threading.RLock()
+
+
 def format_docx(filepath: str, profile: ProfileConfig,
                 output_path: Optional[str] = None,
                 output_dir: str = "") -> Tuple[bool, str, str]:
+    """排版单个 .docx 文件（加锁入口，逻辑见 _format_docx_inner）。"""
+    with _ENGINE_LOCK:
+        return _format_docx_inner(filepath, profile, output_path, output_dir)
+
+
+def _format_docx_inner(filepath: str, profile: ProfileConfig,
+                       output_path: Optional[str] = None,
+                       output_dir: str = "") -> Tuple[bool, str, str]:
     """排版单个 .docx 文件。
 
     Args:
@@ -333,6 +349,12 @@ def format_docx(filepath: str, profile: ProfileConfig,
 
 
 def convert_doc_to_docx(filepath: str) -> Tuple[bool, str, Optional[str]]:
+    """将 .doc 转换为 .docx（通过 Word/WPS COM，加锁串行化）"""
+    with _ENGINE_LOCK:
+        return _convert_doc_to_docx_inner(filepath)
+
+
+def _convert_doc_to_docx_inner(filepath: str) -> Tuple[bool, str, Optional[str]]:
     """将 .doc 转换为 .docx（通过 Word/WPS COM）"""
     if not HAS_COM:
         return False, "缺少 pywin32 库，无法处理 .doc 文件。请安装: pip install pywin32", None
@@ -459,13 +481,3 @@ def process_file(filepath: str, profile: ProfileConfig,
         return ok2, msg2, out_path2
 
     return False, f"不支持的文件格式: {ext}", ""
-
-
-def check_dependencies() -> list[str]:
-    """返回缺失的依赖列表"""
-    missing = []
-    if not HAS_DOCX:
-        missing.append("python-docx")
-    if not HAS_COM:
-        missing.append("pywin32")
-    return missing

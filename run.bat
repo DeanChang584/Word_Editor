@@ -10,9 +10,9 @@ echo ========================================
 echo.
 
 rem -- Kill stale backend processes (old code keeps serving otherwise) --
+rem 只按进程名清理，避免误杀占用 8765 端口的无关程序
 echo [0/2] Cleaning up stale backend processes...
 taskkill /F /IM backend.exe >nul 2>&1
-for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8765" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>&1
 ping -n 2 127.0.0.1 >nul
 
 rem -- Backend --

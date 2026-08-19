@@ -377,6 +377,14 @@ class FileResult(_Base):
     message: str = ""
 
 
+class FailedFileItem(_Base):
+    """One failed file within a task result (for frontend retry)."""
+
+    file: str = ""
+    path: str = ""
+    status: str = "error"
+
+
 class TaskResult(_Base):
     """Aggregate result after a task finishes."""
 
@@ -386,6 +394,7 @@ class TaskResult(_Base):
     elapsed: float = 0.0
     output_directory: str = Field(default="", alias="outputDirectory")
     results: list[FileResult] = Field(default_factory=list)
+    failed_files: list[FailedFileItem] = Field(default_factory=list, alias="failedFiles")
 
 
 # ============================================================

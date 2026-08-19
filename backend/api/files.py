@@ -88,8 +88,10 @@ async def add_files(req: AddFilesRequest):
 
 
 # 6.3 — Add folder
+# 同步 def（FastAPI 放入线程池执行）：递归 rglob + 逐文件 stat 是阻塞 IO，
+# 若放在 async 处理器里会卡死事件循环，导致前端的 format/status 轮询全部超时。
 @router.post("/add-folder")
-async def add_folder(req: AddFolderRequest):
+def add_folder(req: AddFolderRequest):
     """Scan a folder for .doc/.docx files and add them."""
     try:
         result = file_service.add_folder(req.folder, req.include_subdir)
@@ -107,7 +109,7 @@ async def remove_files(req: RemoveFilesRequest):
         return _error(ErrorCode.PARAM_ERROR, "paths must not be empty")
 
     removed = file_service.remove_files(req.paths)
-    return success_response({"removed_count": removed}, message="Files removed")
+    return success_response({"count": removed}, message="Files removed")
 
 
 # 6.5 — Clear file list

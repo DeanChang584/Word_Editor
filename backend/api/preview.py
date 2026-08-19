@@ -14,6 +14,7 @@ from __future__ import annotations
 import os
 import tempfile
 import threading
+import time
 from pathlib import Path
 from typing import Any
 
@@ -97,6 +98,33 @@ class PdfPreviewRequest(BaseModel):
 _pdf_tasks: dict[str, dict[str, Any]] = {}
 _pdf_tasks_lock = threading.Lock()
 
+# 终端态预览任务在注册表中的保留时长（秒）。之后被定期清理，防止无限增长。
+_PREVIEW_TASK_TTL_SECONDS = 600
+
+
+def _safe_remove(path: str | None) -> None:
+    """Best-effort delete of a temp file; never raises."""
+    if not path:
+        return
+    try:
+        os.remove(path)
+    except OSError:
+        pass
+
+
+def _prune_pdf_tasks() -> None:
+    """Remove terminal preview tasks older than the TTL to bound memory."""
+    now = time.time()
+    with _pdf_tasks_lock:
+        stale = [
+            tid for tid, t in _pdf_tasks.items()
+            if t["status"] in ("completed", "error", "cancelled")
+            and t.get("finish_time") is not None
+            and now - t["finish_time"] > _PREVIEW_TASK_TTL_SECONDS
+        ]
+        for tid in stale:
+            del _pdf_tasks[tid]
+
 
 # ============================================================
 # PDF Preview — endpoints
@@ -130,12 +158,15 @@ async def preview_pdf(req: PdfPreviewRequest):
     task_id = _new_pdf_task_id()
     cancel_event = threading.Event()
 
+    _prune_pdf_tasks()  # 顺带清理过期终端任务，控制内存
+
     with _pdf_tasks_lock:
         _pdf_tasks[task_id] = {
             "status": "preparing",
             "pdf_path": None,
             "error": None,
             "cancel": cancel_event,
+            "finish_time": None,
         }
 
     # Start background thread
@@ -161,14 +192,17 @@ async def preview_pdf_status(task_id: str):
     """
     with _pdf_tasks_lock:
         task = _pdf_tasks.get(task_id)
-
-    if task is None:
-        return _error(ErrorCode.TASK_NOT_FOUND, "预览任务不存在")
+        if task is None:
+            return _error(ErrorCode.TASK_NOT_FOUND, "预览任务不存在")
+        # 在锁内读取全部字段，避免与工作线程的写入交错
+        state = task["status"]
+        preview_path = task["pdf_path"]
+        error = task["error"]
 
     return success_response({
-        "state": task["status"],
-        "previewPath": task["pdf_path"],
-        "error": task["error"],
+        "state": state,
+        "previewPath": preview_path,
+        "error": error,
     })
 
 
@@ -197,35 +231,47 @@ def _run_pdf_task(
     profile: ProfileConfig,
     cancel: threading.Event,
 ) -> None:
-    """Background thread: format a doc → docx, then export to PDF via COM."""
+    """Background thread: format a doc → docx, then return the temp .docx.
+
+    无论成功/失败/取消，所有产生的临时文件（.doc 转换的 ``.converted.docx``、
+    ``wf_preview_{task_id}.docx``）都在退出路径上清理 —— 否则每个预览
+    都会在 %TEMP% 和用户的源目录里永久残留临时文件。
+    """
+    docx_path: str | None = None
+    delete_docx = False
+    tmp_docx: str | None = None
+    status = "error"
+    pdf_path: str | None = None
+    error: str | None = None
+
     try:
         with _pdf_tasks_lock:
             _pdf_tasks[task_id]["status"] = "running"
 
         ext = Path(filepath).suffix.lower()
-        docx_path: str | None = None
-        delete_docx = False
 
         # Step 1: get a .docx to work with
         if ext == ".doc":
             if cancel.is_set():
-                return _finish_pdf(task_id, "cancelled", None, None)
+                status = "cancelled"
+                return
 
             if not HAS_COM:
-                return _finish_pdf(
-                    task_id, "error", None,
-                    "预览 .doc 文件需要安装 pywin32。请使用 .docx 格式。",
-                )
+                error = "预览 .doc 文件需要安装 pywin32。请使用 .docx 格式。"
+                return
+
             ok, msg, converted = convert_doc_to_docx(filepath)
             if not ok or converted is None:
-                return _finish_pdf(task_id, "error", None, msg)
+                error = msg
+                return
             docx_path = converted
             delete_docx = True
         else:
             docx_path = filepath
 
         if cancel.is_set():
-            return _finish_pdf(task_id, "cancelled", None, None)
+            status = "cancelled"
+            return
 
         # Step 2: format the docx (in-place on a temp copy)
         tmp_docx = os.path.join(
@@ -234,24 +280,33 @@ def _run_pdf_task(
         )
         ok, msg, _ = format_docx(docx_path, profile, output_path=tmp_docx)
         if not ok:
-            return _finish_pdf(task_id, "error", None, msg)
-
-        if delete_docx:
-            try:
-                os.remove(docx_path)
-            except Exception:
-                pass
+            error = msg
+            return
 
         if cancel.is_set():
-            return _finish_pdf(task_id, "cancelled", None, None)
+            status = "cancelled"
+            return
 
         # Step 3: return the formatted .docx path — the frontend handles
         # WPS/Word COM → PDF conversion
-        return _finish_pdf(task_id, "completed", tmp_docx, None)
+        status = "completed"
+        pdf_path = tmp_docx
 
     except Exception as exc:
         logger.exception("PDF preview task %s failed", task_id)
-        return _finish_pdf(task_id, "error", None, str(exc))
+        error = str(exc)
+
+    finally:
+        _finish_pdf(task_id, status, pdf_path, error)
+        # 清理临时文件：
+        #  - .doc 转换产物（源目录旁）只在本任务内使用，任何状态都删除；
+        #  - 失败/取消场景前端不会读取 tmp_docx，直接删除；
+        #  - completed 场景 tmp_docx 是交付给前端转 PDF 的文件，
+        #    由前端转换完成后删除（PreviewWindow.LoadPdfFromDocxAsync finally）。
+        if delete_docx:
+            _safe_remove(docx_path)
+        if status in ("error", "cancelled"):
+            _safe_remove(tmp_docx)
 
 
 def _finish_pdf(
@@ -265,6 +320,7 @@ def _finish_pdf(
             _pdf_tasks[task_id]["status"] = status
             _pdf_tasks[task_id]["pdf_path"] = pdf_path
             _pdf_tasks[task_id]["error"] = error
+            _pdf_tasks[task_id]["finish_time"] = time.time()
 
 
 def _new_pdf_task_id() -> str:

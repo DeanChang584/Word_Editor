@@ -1,48 +1,14 @@
 """
 排版配置数据模型（Phase 2 重构版）
 
-constants（FONT_SIZE_MAP / PAPER_SIZES）保留供引擎规则函数使用。
 dataclass 用于格式化器内部持有数据（从 shared.schemas.ProfileConfig 转换而来）。
+共享常量（FONT_SIZE_MAP / PAPER_SIZES 等）统一定义在 shared.constants。
 
 Python 内部使用 snake_case（PEP 8），JSON 输出由 shared/schemas.py
 的 Pydantic alias_generator 统一转 camelCase（Q1 决议）。
 """
 
 from dataclasses import dataclass, field
-
-# ============================================================
-# 字号映射（供引擎、预览、UI 使用）
-# ============================================================
-
-FONT_SIZE_MAP = {
-    "初号": 42, "小初": 36, "一号": 26, "小一": 24,
-    "二号": 22, "小二": 18, "三号": 16, "小三": 15,
-    "四号": 14, "小四": 12, "五号": 10.5, "小五": 9,
-}
-FONT_SIZE_NAMES = list(FONT_SIZE_MAP.keys())
-
-
-def font_size_to_name(size_pt: float) -> str:
-    """pt → 中文字号名称，无匹配返回 pt 数字字符串"""
-    for name, pt in FONT_SIZE_MAP.items():
-        if abs(pt - size_pt) < 0.01:
-            return name
-    return str(size_pt)
-
-
-# ============================================================
-# 纸张大小定义（宽, 高, 单位 mm）
-# ============================================================
-
-PAPER_SIZES = {
-    "A4": (210, 297),
-    "A3": (297, 420),
-    "A5": (148, 210),
-    "B5": (176, 250),
-    "Letter": (215.9, 279.4),
-    "Legal": (215.9, 355.6),
-}
-
 
 # ============================================================
 # 内部配置 dataclass（从 shared.schemas DTO 转换后使用）
