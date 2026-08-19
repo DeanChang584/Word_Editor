@@ -94,7 +94,7 @@ class TestFlow2_AddFiles:
     async def test_remove_file_updates_list(self, client: AsyncClient):
         await client.post("/files/add", json={"paths": [TEST_A, TEST_B]})
         r = await client.post("/files/remove", json={"paths": [TEST_A]})
-        assert r.json()["data"]["removed_count"] == 1
+        assert r.json()["data"]["count"] == 1
 
         r = await client.get("/files")
         assert len(r.json()["data"]["files"]) == 1

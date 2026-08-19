@@ -1,8 +1,0 @@
-{
-  "theme": "system",
-  "language": "zh-CN",
-  "defaultOutput": "sameFolder",
-  "defaultTemplate": "Default",
-  "recentCount": 20,
-  "autoCheckUpdate": true
-}

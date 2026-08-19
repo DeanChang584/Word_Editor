@@ -24,6 +24,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.server import app  # noqa: E402
+from shared.version import VERSION
 
 # ── Test data paths ───────────────────────────────────────────────────
 
@@ -59,7 +60,8 @@ class TestHealth:
         assert body["success"] is True
         assert body["code"] == 0
         assert body["data"]["status"] == "ok"
-        assert body["data"]["version"] == "2.0"
+        # 与 shared/version 保持一致，避免版本升级时测试漂移
+        assert body["data"]["version"] == VERSION
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -123,7 +125,8 @@ class TestFiles:
         assert r.status_code == 200
         body = r.json()
         assert body["success"] is True
-        assert body["data"]["removed_count"] == 1
+        # 契约统一为 count（与 add / add-folder 一致，前端 AddCountDto 解析）
+        assert body["data"]["count"] == 1
 
     async def test_search_files(self, client: AsyncClient):
         await client.delete("/files")
