@@ -104,6 +104,12 @@ public sealed class TrayIconService : IDisposable
     private IntPtr _hIcon = IntPtr.Zero;
     private bool _disposed;
 
+    // 必须保存委托的强引用！GetFunctionPointerForDelegate 只返回函数指针，
+    // 若委托被 GC 回收，隐藏窗口收到任何消息（托盘回调 / WM_DESTROY 等）都会
+    // 触发 FailFast 崩溃（"callback was made on a garbage collected delegate"），
+    // 表现为随机时机进程直接退出。字段持有引用后委托与类同生命周期。
+    private WndProcDelegate? _wndProcDelegate;
+
     private readonly string _tooltip;
     private readonly Window _appWindow;
 
@@ -133,11 +139,14 @@ public sealed class TrayIconService : IDisposable
 
         var hInstance = GetModuleHandleW(null);
 
+        // 保存委托强引用（见字段注释）——防 GC 回收后窗口消息触发 FailFast
+        _wndProcDelegate = new WndProcDelegate(WndProc);
+
         // Register a message-only window class
         var wndClass = new WNDCLASSW
         {
             style = 0,
-            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(new WndProcDelegate(WndProc)),
+            lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProcDelegate),
             cbClsExtra = 0,
             cbWndExtra = 0,
             hInstance = hInstance,

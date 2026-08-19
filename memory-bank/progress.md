@@ -147,6 +147,10 @@
   - 后端 `get_all_templates()` 补齐 profile 字段 → 前端 `ApplySelectedTemplate` 可真正应用模板。
   - `FormatControlView.PopulateTemplateBox` 加重入锁 `_isPopulating`，消除 SelectionChanged 内改 Items 的 WinUI 崩溃。
   - `ApplySelectedTemplate` / `SwitchTemplateAsync` 加 try-catch，异常显示到状态栏而非退出进程。
+  - **二次修复（选模板仍偶发自动退出）**：事件日志 5 次 FailFast 均为 `TrayIconService.WndProcDelegate` 委托 GC 陷阱——
+    `Marshal.GetFunctionPointerForDelegate(new WndProcDelegate(WndProc))` 未保存委托强引用，隐藏托盘窗口收到任意消息
+    （托盘回调 / WM_DESTROY）即调用已回收委托 → FailFast 崩溃，时机随机（用户易归因于当时正在做的操作）。
+    修复：`_wndProcDelegate` 字段持有引用，与类同生命周期。
 - [x] **添加文档没反应（静默失败）**：`FilesViewModel.StatusMessage` 从未被 UI 显示。
   - `MainViewModel.WireSubVmSync` 增加 `FilesVm.StatusMessage → StatusText` 转发。
   - 前端预校验文件/文件夹路径，不存在时立即提示具体名称。

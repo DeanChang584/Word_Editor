@@ -10,6 +10,7 @@
   - 后端模板列表补齐 profile 字段，选择模板可真正生效。
   - 前端 ComboBox 下拉回填加重入锁，消除 SelectionChanged 内修改 Items 导致的 WinUI 崩溃。
   - 模板应用链路 (ApplySelectedTemplate / SwitchTemplateAsync) 加 try-catch，失败显示到状态栏而非退出进程。
+  - **二次修复（选模板仍偶发自动退出）**：事件日志 5 次 FailFast 均为 `TrayIconService.WndProcDelegate` 委托被 GC 回收后窗口消息回调崩溃——`Marshal.GetFunctionPointerForDelegate` 只取函数指针不保引用，隐藏托盘窗口收到任何消息（托盘回调 / WM_DESTROY）即触发 FailFast，时机随机，易在选模板等高交互操作时撞上。改为保存委托强引用字段（`_wndProcDelegate`），崩溃根除。
 - **添加文档没反应**：`FilesViewModel.StatusMessage` 此前只赋值从不显示，任何失败都静默。现同步到状态栏，并增加前端路径预校验（文件/文件夹不存在时立即提示具体名称）。
 - **关闭软件延迟**：关闭时不再 `await` 网络请求后才退出；后端退出最多等 100ms，WPS COM 单例后台释放，点击关闭后立即退出。`/api/shutdown` 调用加 `ConfigureAwait(false)`，消除 UI 线程 sync-over-async 死锁（实测窗口销毁 326ms → 22ms）。
   - **三次修复（真实点击仍慢 2-3s）**：根因是 WPS COM 预热实例（隐藏 wps.exe）fire-and-forget 释放被 `Environment.Exit` 抢先杀死——RCW 未释放导致 CLR 退出时等待 COM 清理数秒，且每个会话泄漏一个隐藏 WPS 进程（实测累积 27+ 个）。改为**同步等待 WPS Quit ≤300ms 后再退出**。实测真实点击：窗口销毁 389ms，wps.exe 不再累积。
