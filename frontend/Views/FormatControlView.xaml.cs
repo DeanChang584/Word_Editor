@@ -88,6 +88,11 @@ namespace WordFormatterUI.Views
 
         private bool _isPopulating; // guards against mutating Items inside SelectionChanged
 
+        /// <summary>
+        /// Rebuild the ComboBox items from the VM's template list, then sync
+        /// the current selection. 仅用于模板集合变化（首次加载/保存/删除）——
+        /// 这些时机下拉 Popup 必然已关闭，重建 Items 是安全的。
+        /// </summary>
         private void PopulateTemplateBox(FormatViewModel vm)
         {
             if (_isPopulating) return;
@@ -103,19 +108,44 @@ namespace WordFormatterUI.Views
                         Tag = t.Id,
                     });
                 }
+            }
+            finally
+            {
+                _isPopulating = false;
+            }
+            SyncTemplateSelection(vm);
+        }
 
-                // Select current template
-                if (!string.IsNullOrEmpty(vm.SelectedTemplateId))
+        /// <summary>
+        /// 仅同步 ComboBox 的选中项，不触碰 Items 集合。
+        /// 用于 SelectedTemplateId 被外部（如模板管理面板 SwitchTemplateAsync）
+        /// 程序化切换时的下拉同步；用户点选路径由 SelectionChanged 自行处理。
+        ///
+        /// 注意：绝不能在这里重建 Items。用户点选模板时，下拉 Popup 的关闭
+        /// 动画仍在进行，此时 Items.Clear() 会销毁 Popup 仍在引用的
+        /// ItemContainer，抛出 COMException 0x80070490 "找不到元素"，
+        /// 经 XAML stowed exception 直接终止进程（实测必崩，startup.log 11:14:57）。
+        /// </summary>
+        private void SyncTemplateSelection(FormatViewModel vm)
+        {
+            if (_isPopulating) return;
+            _isPopulating = true;
+            try
+            {
+                if (string.IsNullOrEmpty(vm.SelectedTemplateId))
                 {
-                    for (int i = 0; i < TemplateBox.Items.Count; i++)
+                    TemplateBox.SelectedIndex = -1;
+                    return;
+                }
+
+                for (int i = 0; i < TemplateBox.Items.Count; i++)
+                {
+                    if (TemplateBox.Items[i] is ComboBoxItem item
+                        && item.Tag is string id
+                        && id == vm.SelectedTemplateId)
                     {
-                        if (TemplateBox.Items[i] is ComboBoxItem item
-                            && item.Tag is string id
-                            && id == vm.SelectedTemplateId)
-                        {
-                            TemplateBox.SelectedIndex = i;
-                            break;
-                        }
+                        TemplateBox.SelectedIndex = i;
+                        break;
                     }
                 }
             }
@@ -238,12 +268,16 @@ namespace WordFormatterUI.Views
                     ProgressText.Text = $"处理中: {vm.ProgressCurrent}/{vm.ProgressTotal}";
                     break;
 
-                case nameof(vm.SelectedTemplateId):
                 case nameof(vm.Templates):
-                    // Populate (or re-populate) the template ComboBox.
-                    // On initial load, TemplateBox.SelectedItem is null
-                    // so the old guard condition was never entered.
+                    // 模板集合变化（首次加载/保存/删除）→ 重建下拉 Items。
+                    // 这些时机 Popup 必然已关闭，重建安全。
                     PopulateTemplateBox(vm);
+                    break;
+
+                case nameof(vm.SelectedTemplateId):
+                    // 只同步选中项，不重建 Items（见 SyncTemplateSelection 注释：
+                    // 下拉关闭动画期间重建会触发 COMException 0x80070490 崩溃）。
+                    SyncTemplateSelection(vm);
                     break;
             }
         }

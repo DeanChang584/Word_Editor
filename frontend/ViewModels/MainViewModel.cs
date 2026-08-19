@@ -87,12 +87,8 @@ public partial class MainViewModel : ObservableObject
     public ProfileConfigDto SharedProfile { get; set; }
 
     /// <summary>
-    /// Push <see cref="SharedProfile"/> to all 6 section VMs so their
-    /// UI-bound properties reflect the current DTO state.
-    /// Called after profile load, template application, reset, and on init.
-    /// Fires <see cref="ProfileRefreshed"/> so Views can push values to controls.
+    /// Trigger ProfileRefreshed so section Views push ViewModel values to their UI controls.
     /// </summary>
-    /// <summary>Trigger ProfileRefreshed so section Views push ViewModel values to their UI controls.</summary>
     public void RefreshAllViews() => ProfileRefreshed?.Invoke();
 
     /// <summary>Update all section VMs to point to current SharedProfile without overwriting user values.</summary>

@@ -7,4 +7,6 @@ public class FileResultDto
     public string Output { get; set; } = "";
     public string OutputPath { get; set; } = "";
     public string Message { get; set; } = "";
+    /// <summary>完整源路径 —— 仅 failedFiles 列表携带，供失败重试使用。</summary>
+    public string Path { get; set; } = "";
 }

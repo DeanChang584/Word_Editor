@@ -171,7 +171,13 @@ public partial class FormatViewModel : ObservableObject
                 {
                     Templates = new ObservableCollection<TemplateDto>(resp.Data.Templates);
 
-                    var def = resp.Data.Templates.FirstOrDefault(t => t.IsDefault);
+                    // 保留当前选中项（若模板仍存在），否则回退到默认模板。
+                    // 不能每次重载都重置为默认 —— 保存新模板后用户的选择必须保持，
+                    // 否则下拉框会在用户眼皮底下跳回"默认模板"。
+                    var current = !string.IsNullOrEmpty(SelectedTemplateId)
+                        ? resp.Data.Templates.FirstOrDefault(t => t.Id == SelectedTemplateId)
+                        : null;
+                    var def = current ?? resp.Data.Templates.FirstOrDefault(t => t.IsDefault);
                     if (def is not null)
                     {
                         SelectedTemplateId = def.Id;
@@ -341,10 +347,10 @@ public partial class FormatViewModel : ObservableObject
                 ElapsedSeconds = result.Elapsed;
                 HasResults = true;
 
-                // Collect failed file paths for retry
+                // Collect failed file paths for retry (优先完整路径，回退文件名)
                 var failed = result.FailedFiles?
                     .Where(f => f.Status is "error" or "failed")
-                    .Select(f => f.File)
+                    .Select(f => !string.IsNullOrWhiteSpace(f.Path) ? f.Path : f.File)
                     .ToList() ?? new List<string>();
                 FailedFilePaths = new ObservableCollection<string>(failed);
                 HasFailedFiles = failed.Count > 0;

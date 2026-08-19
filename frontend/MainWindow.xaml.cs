@@ -754,9 +754,9 @@ public sealed partial class MainWindow : Window
             if (saved != null)
             {
                 vm.StatusText = $"模板「{name}」保存成功";
-                // Reload templates and refresh the combo box dropdown
+                // Reload templates — FormatControlView listens to the Templates
+                // property change and rebuilds the dropdown itself.
                 await FormatVm.LoadTemplatesCommand.ExecuteAsync(null);
-                FormatControlView.RefreshTemplates();
 
                 // Also refresh the template management list so newly saved template appears there
                 await TemplateManagementVm.LoadTemplatesCommand.ExecuteAsync(null);

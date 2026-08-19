@@ -60,7 +60,6 @@ public sealed partial class PreviewWindow : Window
     // ── State ──────────────────────────────────────────────────────────
 
     private CancellationTokenSource? _pollCts;
-    private string? _currentPdfPath;
     private bool _viewerLoaded; // true after viewer.html first loads
     private static bool _pdfjsReady; // true after pdfjs assets copied to LOCALAPPDATA
     private readonly DocumentPreviewService _previewService = new();
@@ -264,13 +263,13 @@ public sealed partial class PreviewWindow : Window
 
     private async Task LoadPdfFromDocxAsync(string docxPath)
     {
+        string? pdfPath = null;
         try
         {
             LoadingText.Text = "正在生成 PDF……";
 
             // Convert .docx → PDF via WPS/Word COM
-            var pdfPath = await _previewService.ConvertToPdfAsync(docxPath);
-            _currentPdfPath = pdfPath;
+            pdfPath = await _previewService.ConvertToPdfAsync(docxPath);
 
             // Verify the PDF was actually created and is non-empty
             if (!File.Exists(pdfPath) || new FileInfo(pdfPath).Length < 100)
@@ -279,7 +278,8 @@ public sealed partial class PreviewWindow : Window
                 return;
             }
 
-            // Load PDF.js viewer in WebView2
+            // Load PDF.js viewer in WebView2 (PDF is copied into the pdfjs
+            // virtual-host directory at this point)
             await LoadPdfInViewerAsync(pdfPath);
         }
         catch (InvalidOperationException ex)
@@ -290,6 +290,19 @@ public sealed partial class PreviewWindow : Window
         {
             ShowError("无法打开预览文件。");
         }
+        finally
+        {
+            // 清理后端生成的临时 docx（wf_preview_*.docx）与转换出的临时 PDF：
+            // 两者都已复制/加载完毕，不再需要。不清理会在 %TEMP% 无限累积。
+            TryDeleteFile(docxPath);
+            TryDeleteFile(pdfPath);
+        }
+    }
+
+    private static void TryDeleteFile(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return;
+        try { File.Delete(path); } catch { /* 可能仍被 COM 占用 —— 尽力而为 */ }
     }
 
     private async Task LoadPdfInViewerAsync(string pdfPath)
